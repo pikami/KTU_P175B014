@@ -20,7 +20,9 @@ Sukūrti žaidimą – gyvatėlė.
 
 ## Rezultatai
 Realizuoto žaidimo nuotrauka:
+
 ![Screenshot](assets/screenshot.png)
 
 Demonstracinis video: https://youtu.be/Gh_whnCX9t4
+
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/Gh_whnCX9t4/0.jpg)](https://youtu.be/Gh_whnCX9t4 "[2018-10-18] P175B014 Vizualios struktūros")
