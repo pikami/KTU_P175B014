@@ -345,7 +345,7 @@ public class BstSetKTU<E extends Comparable<E>> implements SortedSetADT<E>, Clon
      */
     @Override
     public SetADT<E> headSet(E element) {
-        throw new UnsupportedOperationException("Studentams reikia realizuoti headSet()");
+        return subSet(getMin(root).element, element);
     }
 
     /**
@@ -357,7 +357,22 @@ public class BstSetKTU<E extends Comparable<E>> implements SortedSetADT<E>, Clon
      */
     @Override
     public SetADT<E> subSet(E element1, E element2) {
-        throw new UnsupportedOperationException("Studentams reikia realizuoti subSet()");
+        Iterator<E> iterator = iterator();
+        
+        // Surandame pradini elementa
+        E current = root.element;
+        while(c.compare(current, element1) != 0){
+            current = iterator.next();
+        }
+        // Judame link paskutinio pridedami visus i nauja kolekcija
+        SetADT<E> result = new BstSetKTU<E>();
+        while(c.compare(current, element2) != 0){
+            result.add(current);
+            current = iterator.next();
+        }
+        result.add(current);
+        
+        return result;
     }
 
     /**
@@ -368,7 +383,7 @@ public class BstSetKTU<E extends Comparable<E>> implements SortedSetADT<E>, Clon
      */
     @Override
     public SetADT<E> tailSet(E element) {
-        throw new UnsupportedOperationException("Studentams reikia realizuoti tailSet()");
+        return subSet(element, getMax(root).element);
     }
 
     /**
@@ -435,7 +450,7 @@ public class BstSetKTU<E extends Comparable<E>> implements SortedSetADT<E>, Clon
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException("Studentams reikia realizuoti remove()");
+            removeRecursive(stack.peek().element, parent);
         }
 
         private void toStack(BstNode<E> n) {
