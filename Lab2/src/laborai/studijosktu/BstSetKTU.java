@@ -183,7 +183,28 @@ public class BstSetKTU<E extends Comparable<E>> implements SortedSetADT<E>, Clon
 
         return null;
     }
+    
+    private BstNode<E> getNode(E element) {
+        if (element == null) {
+            throw new IllegalArgumentException("Element is null in get(E element)");
+        }
 
+        BstNode<E> node = root;
+        while (node != null) {
+            int cmp = c.compare(element, node.element);
+
+            if (cmp < 0) {
+                node = node.left;
+            } else if (cmp > 0) {
+                node = node.right;
+            } else {
+                return node;
+            }
+        }
+
+        return null;
+    }
+    
     /**
      * Pašalina maksimalaus rakto elementą paiešką pradedant mazgu node
      *
@@ -357,22 +378,31 @@ public class BstSetKTU<E extends Comparable<E>> implements SortedSetADT<E>, Clon
      */
     @Override
     public SetADT<E> subSet(E element1, E element2) {
-        Iterator<E> iterator = iterator();
-        
-        // Surandame pradini elementa
-        E current = root.element;
-        while(c.compare(current, element1) != 0){
-            current = iterator.next();
+        return subSet(element1, true, element2, true);
+    }
+    
+    public SortedSetADT<E> subSet(E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
+        BstSetKTU<E> result = new BstSetKTU<E>();
+        if (contains(fromElement) && contains(toElement)) {
+            BstNode<E> n = getNode(fromElement);
+            subSetRecursive(result, n, toElement, toInclusive);
         }
-        // Judame link paskutinio pridedami visus i nauja kolekcija
-        SetADT<E> result = new BstSetKTU<E>();
-        while(c.compare(current, element2) != 0){
-            result.add(current);
-            current = iterator.next();
-        }
-        result.add(current);
-        
+        if(fromInclusive) result.remove(fromElement);
         return result;
+    }
+    
+    private BstNode<E> subSetRecursive(SetADT<E> newSet, BstNode<E> n, E d, boolean toInclusive) {
+        if (n == null) {
+            return null;
+        }
+        if (n.element != d) {
+            newSet.add(n.element);
+            subSetRecursive(newSet, n.right, d, toInclusive);
+            subSetRecursive(newSet, n.left, d, toInclusive);
+        } else if(toInclusive) {
+            newSet.add(n.element);
+        }
+        return n;
     }
 
     /**
@@ -384,6 +414,10 @@ public class BstSetKTU<E extends Comparable<E>> implements SortedSetADT<E>, Clon
     @Override
     public SetADT<E> tailSet(E element) {
         return subSet(element, getMax(root).element);
+    }
+    
+    public SortedSetADT<E> tailSet(E fromElement, boolean inclusive){
+        return subSet(fromElement, inclusive, getMax(root).element, inclusive);
     }
 
     /**
@@ -483,5 +517,25 @@ public class BstSetKTU<E extends Comparable<E>> implements SortedSetADT<E>, Clon
             this.left = null;
             this.right = null;
         }
+    }
+    
+    public void retainAll(BstSetKTU<E> c){
+        Iterator iterator = iterator();
+        E current = root.element;
+        while(current != null){
+            if(!c.contains(current)){
+                remove(current);
+            }
+            current = (E) iterator.next();
+        }
+    }
+    
+    private int treeHeightRecursive(BstNode<E> n, int height){
+        return n == null ? height : Math.max(treeHeightRecursive(n.left, height + 1), treeHeightRecursive(n.right, height + 1));
+    }
+    
+    @Override
+    public int treeHeight(){
+        return treeHeightRecursive(root, 0);
     }
 }

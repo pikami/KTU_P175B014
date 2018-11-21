@@ -7,6 +7,7 @@ package Lab2Kamandulis.swing;
 
 import Lab2Kamandulis.Human;
 import Lab2Kamandulis.HumanGenerator;
+import Lab2Kamandulis.HumanSpeedTest;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -215,11 +216,10 @@ public class HumanWindow extends JFrame implements ActionListener {
                 treeEfficiency();
             } else if (source.equals(panButtons.getButtons().get(4))) {
                 treeRemove();
-            } else if (source.equals(panButtons.getButtons().get(5))
-                    || source.equals(panButtons.getButtons().get(6))) {
-                HumanKsSwing.setFormatStartOfLine(true);
-                HumanKsSwing.ounerr(taOutput, MESSAGES.getString("msg1"));
-                HumanKsSwing.setFormatStartOfLine(false);
+            } else if (source.equals(panButtons.getButtons().get(5))) {
+                treeHeight();
+            } else if (source.equals(panButtons.getButtons().get(6))) {
+                treeEfficiency2();
             } else if (source.equals(cmbTreeType)) {
                 enableButtons(false);
             }
@@ -305,6 +305,18 @@ public class HumanWindow extends JFrame implements ActionListener {
         }
         HumanKsSwing.setFormatStartOfLine(false);
     }
+    
+    private void treeHeight() {
+        HumanKsSwing.setFormatStartOfLine(true);
+        if (humanSet.isEmpty()) {
+            HumanKsSwing.ounerr(taOutput, MESSAGES.getString("msg4"));
+            HumanKsSwing.oun(taOutput, humanSet.toVisualizedString(delimiter));
+        } else {
+            int treeHeight = humanSet.treeHeight();
+            HumanKsSwing.oun(taOutput, treeHeight, MESSAGES.getString("msg9"));
+        }
+        HumanKsSwing.setFormatStartOfLine(false);
+    }
 
     private void treeIteration() {
         HumanKsSwing.setFormatStartOfLine(true);
@@ -314,6 +326,51 @@ public class HumanWindow extends JFrame implements ActionListener {
             HumanKsSwing.oun(taOutput, humanSet, MESSAGES.getString("msg8"));
         }
         HumanKsSwing.setFormatStartOfLine(false);
+    }
+    
+    private void treeEfficiency2() throws MyException {
+        HumanKsSwing.setFormatStartOfLine(true);
+        HumanKsSwing.oun(taOutput, "", MESSAGES.getString("msg2"));
+        HumanKsSwing.setFormatStartOfLine(false);
+        boolean[] statesOfButtons = new boolean[panButtons.getButtons().size()];
+        for (int i = 0; i < panButtons.getButtons().size(); i++) {
+            statesOfButtons[i] = panButtons.getButtons().get(i).isEnabled();
+            panButtons.getButtons().get(i).setEnabled(false);
+        }
+        cmbTreeType.setEnabled(false);
+        for (Component component : menus.getComponents()) {
+            component.setEnabled(false);
+        }
+        
+        HumanSpeedTest ht = new HumanSpeedTest();
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        
+        executorService.submit(() -> {
+            HumanKsSwing.setFormatStartOfLine(false);
+            try {
+                String result;
+                while (!(result = ht.getResultsLogger().take())
+                        .equals(GreitaveikosTyrimas.FINISH_COMMAND)) {
+                    HumanKsSwing.ou(taOutput, result);
+                    ht.getSemaphore().release();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            ht.getSemaphore().release();
+
+            for (int i = 0; i < panButtons.getButtons().size(); i++) {
+                panButtons.getButtons().get(i).setEnabled(statesOfButtons[i]);
+            }
+            cmbTreeType.setEnabled(true);
+            for (Component component : menus.getComponents()) {
+                component.setEnabled(true);
+            }
+        });
+        
+        executorService.submit(() -> ht.startTheTest());
+        executorService.shutdown();
     }
 
     private void treeEfficiency() throws MyException {

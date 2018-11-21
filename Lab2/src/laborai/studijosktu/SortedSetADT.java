@@ -35,4 +35,6 @@ public interface SortedSetADT<E> extends SetADT<E> {
      * @return Grąžinamas atvirkštinis iteratorius.
      */
     Iterator<E> descendingIterator();
+    
+    int treeHeight();
 }
